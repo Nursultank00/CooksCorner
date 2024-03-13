@@ -15,8 +15,28 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from rest_framework import permissions
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+
+from utils.swagger import CustomizedOpenAPISchemaGenerator
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Authorization Project",
+      default_version='v1.0',
+       description="Проект предоставляет доступ к запросам, требующим аутентификации с помощью JWT токенов.",
+      terms_of_service="https://www.google.com/policies/terms/",
+      contact=openapi.Contact(email="auth.project.nursultan@gmail.com"),
+      license=openapi.License(name="BSD License"),
+   ),
+   public=True,
+   permission_classes=[permissions.AllowAny],
+   generator_class=CustomizedOpenAPISchemaGenerator
+)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('cookscorner/admin/', admin.site.urls),
+    # path('cookscorner/users/', include('users.urls')),
 ]
