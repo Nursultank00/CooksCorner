@@ -1,0 +1,29 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:latest
+    restart: always
+    expose:
+      - "5434"
+    ports:
+      - "5434:5432"
+    env_file:
+      - .env
+    volumes:
+      - "./postgres:/var/lib/postgresql/data"
+    command: -p 5434
+
+  app:
+    build: .
+    command: ./entrypoint.sh
+    volumes:
+      - .:/code
+      - ./static:/app/static
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    depends_on:
+      - db
