@@ -1,8 +1,10 @@
 # Create your models here.
+from uuid import uuid4
+
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 
-from uuid import uuid4
+from .utils import LowercaseEmailField
 # Create your models here.
 
 class UserManager(BaseUserManager):
@@ -23,7 +25,7 @@ class UserManager(BaseUserManager):
     
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key = True, default = uuid4, editable = False)
-    email = models.EmailField(unique = True)
+    email = LowercaseEmailField(unique = True)
     is_staff = models.BooleanField(default = False)
     is_superuser = models.BooleanField(default = False)
     is_verified = models.BooleanField(default = False)
