@@ -7,7 +7,6 @@ from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
 from decouple import config
 
-
 # Overriding email field of the model
 class LowercaseEmailField(models.EmailField):
     """

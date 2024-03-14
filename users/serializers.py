@@ -6,7 +6,7 @@ from .models import User
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email']
+        fields = ['email', 'password']
 
 class SignupSerializer(serializers.Serializer):
     email = serializers.EmailField()
