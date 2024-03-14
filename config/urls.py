@@ -15,12 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path, include
 from rest_framework import permissions
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
-from utils.swagger import CustomizedOpenAPISchemaGenerator
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -32,11 +31,13 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
    public=True,
-   permission_classes=[permissions.AllowAny],
-   generator_class=CustomizedOpenAPISchemaGenerator
+   permission_classes=[permissions.AllowAny]
 )
 
 urlpatterns = [
+    re_path(r'^cookscorner/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    re_path(r'^cookscorner/swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^cookscorner/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('cookscorner/admin/', admin.site.urls),
-    # path('cookscorner/users/', include('users.urls')),
+    path('cookscorner/users/', include('users.urls')),
 ]
