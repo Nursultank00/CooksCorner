@@ -22,3 +22,4 @@ class UserAdmin(UserAdmin):
     ordering = ('email',)
 
 admin.site.register(User, UserAdmin)
+admin.site.register(ConfirmationCode)

@@ -7,8 +7,8 @@ from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
 from decouple import config
 
-# Overriding email field of the model
 
+# Overriding email field of the model
 class LowercaseEmailField(models.EmailField):
     """
     Override EmailField to convert emails to lowercase before saving.
@@ -52,7 +52,7 @@ class LengthValidator:
             )
         if len(password) > self.max_length:
             raise ValidationError(
-                _("This password's length must be lower than %(max_length)d characters."),
+                _("The password's length must be lower than %(max_length)d characters."),
                 code="password_too_long",
                 params={"max_length": self.max_length+1},
             )
@@ -71,7 +71,7 @@ class DigitValidator:
     def validate(self, password, user=None):
         if not any(char.isdigit() for char in password):
             raise ValidationError(
-                _("This password must contain at least 1 numeric character."),
+                _("The password must contain at least 1 numeric character."),
                 code="no numeric character"
             )
 
@@ -87,12 +87,12 @@ class UpperLowerValidator:
     def validate(self, password, user=None):
         if not any(char.isupper() for char in password):
             raise ValidationError(
-                _("This password must contain at least 1 upper case character."),
+                _("The password must contain at least 1 upper case character."),
                 code="no upper case character"
             )
         if not any(char.islower() for char in password):
             raise ValidationError(
-                _("This password must contain at least 1 lower case characters."),
+                _("The password must contain at least 1 lower case characters."),
                 code="no lower case character"
             )
 
@@ -108,7 +108,7 @@ class SpecialCharacterValidator:
     def validate(self, password, user=None):
         if not re.search(r'[-_!@#$%^&*(),.?":{}|<>]', password):
             raise ValidationError(
-                _("This password must contain at least 1 special case character."),
+                _("The password must contain at least 1 special case character."),
                 code="no special character"
             )
 

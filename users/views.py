@@ -1,15 +1,11 @@
-from datetime import timedelta
-
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.views import Response, APIView
-from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import SignupSerializer
-from .models import ConfirmationCode, User
-from .utils import EmailUtil
+from .models import User
+from .users_services import create_token_and_send_to_email
 # Create your views here.
 
 class SignupAPIView(APIView):
@@ -36,15 +32,8 @@ class SignupAPIView(APIView):
         try:
             serializer.save()
         except Exception as e:
-            return Response(e, status=status.HTTP_400_BAD_REQUEST)
-        
+            Response(e, status=status.HTTP_400_BAD_REQUEST)
         user_data = serializer.data
         user = User.objects.get(email = user_data['email'])
-        token = RefreshToken().for_user(user).access_token
-        token.set_exp(lifetime=timedelta(minutes=5))
-        ConfirmationCode.objects.create(user = user, code = str(token))
-        data = {'token':str(token),
-                'to_email': user.email,
-                'email_subject':'Verify your email'}
-        EmailUtil.send_email(data)
-        return Response({'email': serializer.data['email']}, status=status.HTTP_201_CREATED)
+        create_token_and_send_to_email(user = user, method = "signup")
+        return Response({"Message": "User has been created and confirmation email has been sent."}, status=status.HTTP_201_CREATED)
