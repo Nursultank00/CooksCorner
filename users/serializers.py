@@ -16,12 +16,17 @@ class SignupSerializer(serializers.Serializer):
     def validate(self, data):
         if data['password'] != data['password_confirm']:
             raise ValidationError("Passwords don't match")
-        try:
-            validate_password(data['password'])
-        except ValidationError as e:
-            raise ValidationError(e)
+        validate_password(data['password'])
         return data
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
         return User.objects.create_user(**validated_data)
+    
+class RefreshTokenSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+
+class MailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email']

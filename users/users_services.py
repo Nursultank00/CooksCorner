@@ -10,11 +10,15 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import ConfirmationCode, User
 from .utils import EmailUtil
 
+def destroy_token(refresh_token):
+    token = RefreshToken(refresh_token)
+    token.blacklist()
+
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
     return {
-        'access_token': str(refresh.access_token),
-        'refresh_token': str(refresh),    
+        'access': str(refresh.access_token),
+        'refresh': str(refresh),    
     }
 
 def validate_user(data):
@@ -32,18 +36,19 @@ def get_user_by_token(token):
     user = User.objects.get(id=payload['user_id'])
     return user
 
-def _create_or_change_confirmation_code(method, user, token):
-    if method == 'signup':
+def _create_or_change_confirmation_code(user, token):
+    user_check = ConfirmationCode.objects.filter(user = user).first()
+    if user_check is None:
         ConfirmationCode.objects.create(user = user, code = str(token))
-    elif method == 'resend':
+    else:
         user_code = ConfirmationCode.objects.get(user = user)
         user_code.code = str(token)
         user_code.save()
 
-def create_token_and_send_to_email(user, method):
+def create_token_and_send_to_email(user):
     token = RefreshToken().for_user(user).access_token
     token.set_exp(lifetime=timedelta(minutes=5))
-    _create_or_change_confirmation_code(method, user, token)
+    _create_or_change_confirmation_code(user, token)
     
     data = {'token':str(token),
             'to_email': user.email,
