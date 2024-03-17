@@ -23,9 +23,9 @@ from drf_yasg.views import get_schema_view
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="Authorization Project",
+      title="CooksCorner",
       default_version='v1.0',
-       description="Проект предоставляет доступ к запросам, требующим аутентификации с помощью JWT токенов.",
+       description="Проект предоставляет доступ к запросам, связанных с приложением для сообщества кулинаров.",
       terms_of_service="https://www.google.com/policies/terms/",
       contact=openapi.Contact(email="auth.project.nursultan@gmail.com"),
       license=openapi.License(name="BSD License"),
