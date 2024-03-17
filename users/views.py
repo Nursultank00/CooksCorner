@@ -22,6 +22,7 @@ from .users_services import (
                             get_tokens_for_user,
                             destroy_token,
                             )
+from userprofile.models import UserProfile
 # Create your views here.
 
 class SignupAPIView(APIView):
@@ -49,8 +50,12 @@ class SignupAPIView(APIView):
             serializer.save()
         except Exception as e:
             Response(e, status=status.HTTP_400_BAD_REQUEST)
-        user_data = serializer.data
-        user = User.objects.get(email = user_data['email'])
+        user = User.objects.get(email = serializer.validated_data['email'])
+        try:
+            UserProfile.objects.create(user = user, username = serializer.validated_data['username'])
+        except Exception:
+            user.delete()
+            return Response({'Message': 'Invalid username.'}, status = status.HTTP_400_BAD_REQUEST)
         create_token_and_send_to_email(user = user)
         tokens = get_tokens_for_user(user)
         return Response(tokens, status = status.HTTP_201_CREATED)

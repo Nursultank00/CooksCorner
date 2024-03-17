@@ -9,6 +9,7 @@ class LoginSerializer(serializers.ModelSerializer):
         fields = ['email', 'password']
 
 class SignupSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=255)
     email = serializers.EmailField()
     password = serializers.CharField(max_length=15, min_length=8, write_only=True)
     password_confirm = serializers.CharField(max_length=15, min_length=8, write_only=True)
@@ -21,6 +22,7 @@ class SignupSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
+        validated_data.pop('username')
         return User.objects.create_user(**validated_data)
     
 class RefreshTokenSerializer(serializers.Serializer):
