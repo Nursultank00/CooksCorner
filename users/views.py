@@ -53,8 +53,9 @@ class SignupAPIView(APIView):
         user = User.objects.get(email = serializer.validated_data['email'])
         try:
             UserProfile.objects.create(user = user, username = serializer.validated_data['username'])
-        except Exception:
+        except Exception as e:
             user.delete()
+            raise e
             return Response({'Message': 'Invalid username.'}, status = status.HTTP_400_BAD_REQUEST)
         create_token_and_send_to_email(user = user)
         tokens = get_tokens_for_user(user)
