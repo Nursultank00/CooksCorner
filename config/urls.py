@@ -41,4 +41,5 @@ urlpatterns = [
     path('cookscorner/admin/', admin.site.urls),
     path('cookscorner/users/', include('users.urls')),
     path('cookscorner/profile/', include('userprofile.urls')),
+    path('cookscorner/receipts/', include('receipts.urls')),
 ]
