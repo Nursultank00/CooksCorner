@@ -1,13 +1,13 @@
 from django.urls import path
 
 from .views import (
-                    GetReceiptAPIView, 
-                    AddReceiptAPIView,
-                    CategoryAPIView
+                    GetRecipeAPIView, 
+                    AddRecipeAPIView,
+                    RecipesByCategoryAPIView
 )
 
 urlpatterns = [
-    path('', AddReceiptAPIView.as_view(), name = 'receipt-add'),
-    path('detail/<slug:slug>/', GetReceiptAPIView.as_view(), name = 'receipt-detail'),
-    path('categories/', CategoryAPIView.as_view(), name = 'receipt-categories')
+    path('', AddRecipeAPIView.as_view(), name = 'Recipe-add'),
+    path('detail/<slug:slug>/', GetRecipeAPIView.as_view(), name = 'Recipe-detail'),
+    path('by-category/', RecipesByCategoryAPIView.as_view(), name = 'Recipe-by-categories')
 ]

@@ -140,7 +140,13 @@ class LoginAPIView(APIView):
             'email' : request.data['email'],
             'password' : request.data['password']
         }
-        user = validate_user(data)
+        email = data['email']
+        password = data['password']
+        user = User.objects.filter(email = email).first()
+        if user is None:
+            return Response({'Error':'No user with this email.'}, status.HTTP_404_NOT_FOUND)
+        if not user.check_password(password):
+            return Response({'Error':'Wrong password!'}, status=status.HTTP_400_BAD_REQUEST)
         tokens = get_tokens_for_user(user)
         return Response(tokens, status = status.HTTP_200_OK)
 
