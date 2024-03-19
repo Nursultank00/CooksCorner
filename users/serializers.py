@@ -32,3 +32,21 @@ class MailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email']
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(max_length = 15)
+    new_password = serializers.CharField(max_length = 15)
+    new_password_confirm = serializers.CharField(max_length = 15)
+
+    def validate(self, data):
+        user = self.context['user']
+        if not user.check_password(data['old_password']):
+            raise ValidationError("Password is incorrect.")
+        if data['new_password'] != data['new_password_confirm']:
+            raise ValidationError("Passwords don't match.")
+        validate_password(data['new_password'])
+        return data
+    
+class MailUrlSerializer(serializers.Serializer):
+    email = serializers.CharField(max_length = 50)
+    url = serializers.CharField(max_length = 100)

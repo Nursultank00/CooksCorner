@@ -29,11 +29,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         return len(obj.saved_by.all())
     
     def get_is_liked(self, obj):
-        user =  self.context['request'].user
+        user = self.context['request'].user
         return obj.liked_by.filter(user = user).exists()
 
     def get_is_saved(self, obj):
-        user =  self.context['request'].user
+        user = self.context['request'].user
         return obj.saved_by.filter(user = user).exists()
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -50,7 +50,7 @@ class AddRecipeSerializer(serializers.ModelSerializer):
 class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['author', 'name', 'description', 'difficulty',
+        fields = ['author', 'name', 'description', 'difficulty', 'meal_picture',
                   'preparation_time', 'category']
         
 class IngredientCreateSerializer(serializers.ModelSerializer):

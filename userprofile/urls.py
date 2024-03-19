@@ -7,7 +7,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path('detail/<slug:slug>/', UserProfileAPIView.as_view(), name = 'profile-detail'),
-    path('follow/<slug:slug>/', UserFollowAPIView.as_view(), name = 'follow-user'),
-    path('search/', SearchUsersAPIView.as_view(), name = 'search-users'),
+    path('detail/<slug:slug>/', UserProfileAPIView.as_view(), name = 'cookscorner-profile-detail'),
+    path('follow/<slug:slug>/', UserFollowAPIView.as_view(), name = 'cookscorner-follow-user'),
+    path('search/', SearchUsersAPIView.as_view(), name = 'cookscorner-search-users'),
 ]

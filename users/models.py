@@ -44,3 +44,10 @@ class ConfirmationCode(models.Model):
 
     def __str__(self):
         return self.user.email + "'s confirmation code"
+
+class ChangePasswordCode(models.Model):
+    user = models.OneToOneField(User, related_name = 'password_code', on_delete = models.CASCADE)
+    code = models.TextField()
+
+    def __str__(self):
+        return self.user.email + "'s password change code"

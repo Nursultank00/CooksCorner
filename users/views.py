@@ -1,10 +1,10 @@
 import jwt
 
+from decouple import config
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import Response, APIView
 from rest_framework_simplejwt.views import TokenRefreshView
-from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -12,7 +12,8 @@ from .serializers import (
                           SignupSerializer,
                           LoginSerializer,
                           RefreshTokenSerializer,
-                          MailSerializer,
+                          ChangePasswordSerializer,
+                          MailUrlSerializer
                          )
 from .models import User, ConfirmationCode
 from .users_services import (
@@ -43,7 +44,9 @@ class SignupAPIView(APIView):
         },
     )
     def post(self, request, *args, **kwargs):
-        serializer = SignupSerializer(data = request.data)
+        data = request.data.copy()
+        url = data.pop('url', config('EMAIL_LINK'))
+        serializer = SignupSerializer(data = data)
         serializer.is_valid(raise_exception = True)
         try:
             serializer.save()
@@ -55,7 +58,7 @@ class SignupAPIView(APIView):
         except Exception as e:
             user.delete()
             return Response({'Message': 'Invalid username.'}, status = status.HTTP_400_BAD_REQUEST)
-        create_token_and_send_to_email(user = user)
+        create_token_and_send_to_email(user = user, query = 'verify-account', url = url)
         tokens = get_tokens_for_user(user)
         return Response(tokens, status = status.HTTP_201_CREATED)
         
@@ -99,20 +102,23 @@ class SendVerifyEmailAPIView(APIView):
     permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
         tags=['Registration'],
-        operation_description="Этот эндпоинт предоставляет "
+        operation_description = "Этот эндпоинт предоставляет "
                               "возможность пользователю "
                               "переотправить токен для "
                               "верификации почты. ",
-        responses= {
-            status.HTTP_200_OK: "Successfully verified.",
-            status.HTTP_404_NOT_FOUND: "User is not found.",
+        request_body = MailUrlSerializer,
+        responses = {
+            200: "The verification email has been sent. ",
+            400: "User is already verified.",
         },
     )
     def post(self, request):
         user = request.user
         if user.is_verified:
-            return Response({'Message':'User is already verified.'}, status=status.HTTP_200_OK)
-        create_token_and_send_to_email(user = user)
+            return Response({'Message':'User is already verified.'}, status=status.HTTP_400_BAD_REQUEST)
+        data = request.data.copy()
+        url = data.pop('url', config('EMAIL_LINK'))
+        create_token_and_send_to_email(user = user, query = 'verify-account', url = url)
         return Response({'Message':'The verification email has been sent.'}, status=status.HTTP_200_OK)
 
 class LoginAPIView(APIView):
@@ -126,10 +132,10 @@ class LoginAPIView(APIView):
                               "Возвращает токен доступа (Access Token) "
                               "и токен обновления (Refresh Token). ",
         request_body = LoginSerializer,
-        responses={
-            status.HTTP_200_OK: "Successfully logged in.",
-            status.HTTP_404_NOT_FOUND: "User is not found.",
-            status.HTTP_400_BAD_REQUEST: "Invalid data.",
+        responses = {
+            200: "Successfully logged in.",
+            404: "User is not found.",
+            404: "Invalid data.",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -171,8 +177,8 @@ class LogoutAPIView(APIView):
                               "с помощью токена обновления (Refresh Token). ",
         request_body = RefreshTokenSerializer,
         responses={
-            status.HTTP_200_OK: "Successfully logged out.",
-            status.HTTP_400_BAD_REQUEST: "Invalid token.",
+            200: "Successfully logged out.",
+            400: "Invalid token.",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -188,14 +194,14 @@ class LogoutAPIView(APIView):
 class DeleteUserAPIView(APIView):
     permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
-        tags=['Authorization'],
-        operation_description="Этот эндпоинт предоставляет "
+        tags = ['Authorization'],
+        operation_description = "Этот эндпоинт предоставляет "
                               "возможность пользователю "
                               "удалить собственный аккаунт. ",
         request_body = RefreshTokenSerializer,
-        responses={
-            status.HTTP_200_OK: "User is successfully deleted.",
-            status.HTTP_400_BAD_REQUEST: "Invalid token.",
+        responses = {
+            200: "User is successfully deleted.",
+            400: "Invalid token.",
         },
     )
     def delete(self, request, *args, **kwargs):
@@ -204,6 +210,61 @@ class DeleteUserAPIView(APIView):
         try:
             destroy_token(refresh_token)
         except Exception:
-            return Response({"Error": "Can't delete the user."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Error": "Can't delete the user."}, status = status.HTTP_400_BAD_REQUEST)
         user.delete()
         return Response({'Message': 'User has been successfully deleted.'}, status=status.HTTP_200_OK)
+
+class ForgotPasswordAPIView(APIView):
+
+    @swagger_auto_schema(
+        tags = ['Authorization'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность пользователю "
+                              "получить токен для сброса пароля. ",
+        request_body = MailUrlSerializer,
+        responses = {
+            200: "Password is successfully changed.",
+            400: "Invalid data.",
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        email = request.data['email']
+        try:
+            user = User.objects.get(email = email)
+        except Exception:
+            return Response({"Error": "User is not found."}, status = status.HTTP_404_NOT_FOUND)
+        data = request.data.copy()
+        url = data.pop('url', config('EMAIL_LINK_PASSWORD'))
+        create_token_and_send_to_email(user = user, query = 'change-password', url = url)
+        return Response({'Message':'The verification email has been sent.'}, status=status.HTTP_200_OK)
+
+
+class ChangePasswordAPIView(APIView):
+
+    @swagger_auto_schema(
+        tags=['Authorization'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность пользователю "
+                              "изменить пароль аккаунта. ",
+        request_body = ChangePasswordSerializer,
+        responses={
+            200: "Password is successfully changed.",
+            400: "Invalid data.",
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            user = request.user
+        else:
+            token = request.GET.get('token')
+            try:
+                user = get_user_by_token(token)
+            except jwt.exceptions.DecodeError:
+                return Response({'Error':'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+            except jwt.ExpiredSignatureError:
+                return Response({'Error':'Activation token expired'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ChangePasswordSerializer(data = request.data, context = {'user': user})
+        serializer.is_valid(raise_exception = True)
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({'Message': 'Password is changed successfully.'}, status=status.HTTP_200_OK)

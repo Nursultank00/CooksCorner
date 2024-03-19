@@ -1,11 +1,11 @@
 import re
 
+from decouple import config
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
 from django.utils.translation import gettext as _
 from django.template.loader import render_to_string
-from decouple import config
 
 # Overriding email field of the model
 class LowercaseEmailField(models.EmailField):
@@ -25,12 +25,12 @@ class EmailUtil:
     Email sending class
     """
     @staticmethod
-    def send_email(data):
+    def send_email(data, url, html):
         context ={
-            'link_app': config('EMAIL_LINK')+data['token']
+            'link_app': ''.join(url)+data['token']#config('EMAIL_LINK')+data['token']
         }
         html_content = render_to_string(
-            'users/email.html', context=context
+            html, context=context
         )
         email = EmailMultiAlternatives(subject = data['email_subject'], to = [data['to_email']])
         email.attach_alternative(html_content, "text/html")
