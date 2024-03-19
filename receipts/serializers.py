@@ -26,7 +26,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return len(obj.liked_by.all())
     
     def get_saves_num(self, obj):
-        return len(obj.liked_by.all())
+        return len(obj.saved_by.all())
     
     def get_is_liked(self, obj):
         user =  self.context['request'].user

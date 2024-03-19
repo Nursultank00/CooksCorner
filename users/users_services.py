@@ -2,9 +2,6 @@ from datetime import timedelta
 import jwt
 
 from django.conf import settings
-
-from rest_framework import status
-from rest_framework.views import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import ConfirmationCode, User
