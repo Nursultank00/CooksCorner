@@ -7,7 +7,8 @@ from .views import (
                     RecipesByChefAPIView,
                     SavedByUserRecipesAPIView,
                     LikeRecipeAPIView,
-                    SaveRecipeAPIView
+                    SaveRecipeAPIView,
+                    SearchRecipesAPIView
 )
 
 urlpatterns = [
@@ -18,4 +19,5 @@ urlpatterns = [
     path('saved-recipes/', SavedByUserRecipesAPIView.as_view(), name = 'saved-recipes'),
     path('like/<slug:slug>/', LikeRecipeAPIView.as_view(), name = 'like-recipe'),
     path('save/<slug:slug>/', SaveRecipeAPIView.as_view(), name = 'save-recipe'),
+    path('search/', SearchRecipesAPIView.as_view(), name = 'search-recipes'),
 ]

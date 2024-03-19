@@ -54,7 +54,6 @@ class SignupAPIView(APIView):
             UserProfile.objects.create(user = user, username = serializer.validated_data['username'])
         except Exception as e:
             user.delete()
-            raise e
             return Response({'Message': 'Invalid username.'}, status = status.HTTP_400_BAD_REQUEST)
         create_token_and_send_to_email(user = user)
         tokens = get_tokens_for_user(user)
@@ -111,7 +110,6 @@ class SendVerifyEmailAPIView(APIView):
     )
     def post(self, request):
         user = request.user
-        user = User.objects.get(email=user.email)
         if user.is_verified:
             return Response({'Message':'User is already verified.'}, status=status.HTTP_200_OK)
         create_token_and_send_to_email(user = user)

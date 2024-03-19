@@ -1,5 +1,7 @@
 from rest_framework.views import Response, status, APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import filters
 from drf_yasg.utils import swagger_auto_schema
 
 from .models import Recipe
@@ -175,3 +177,22 @@ class LikeRecipeAPIView(APIView):
         else:
             recipe.liked_by.add(profile)
         return Response({"Error": "Success."}, status = status.HTTP_200_OK)
+    
+class SearchRecipesAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    search_fields = ['name']
+    filter_backends = (filters.SearchFilter,)
+
+    @swagger_auto_schema(
+        tags=['Recipes'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность найти рецепт по названию. ",                
+        responses = {
+            200: RecipeSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        queryset = Recipe.objects.all()
+        queryset = self.filter_queryset(queryset)
+        data = get_paginated_data(queryset, request)
+        return Response(data, status = status.HTTP_200_OK)
