@@ -1,10 +1,12 @@
 from rest_framework.views import APIView, Response, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
+from rest_framework import filters
 from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import ProfileSerializer
-from .models import UserProfile, User
-
+from .models import UserProfile
+from .services import get_paginated_data
 # Create your views here.
 
 class UserProfileAPIView(APIView):
@@ -100,3 +102,22 @@ class UserUnfollowAPIView(APIView):
         user = request.user
         user.profile.following.remove(profile.user)
         return Response({'Message':'Success.'}, status=status.HTTP_200_OK)
+
+class SearchUsersAPIView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    search_fields = ['username']
+    filter_backends = (filters.SearchFilter,)
+
+    @swagger_auto_schema(
+        tags=['Recipes'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность найти рецепт по названию. ",                
+        responses = {
+            200: ProfileSerializer,
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        queryset = UserProfile.objects.all()
+        queryset = self.filter_queryset(queryset)
+        data = get_paginated_data(queryset, request)
+        return Response(data, status = status.HTTP_200_OK)
