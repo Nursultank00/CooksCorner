@@ -58,7 +58,10 @@ class AddRecipeAPIView(APIView):
             return Response({"Error": "User is not verified."}, status = status.HTTP_403_FORBIDDEN)
         data = request.data
         data['author'] = request.user.profile.id
-        ingredients = data.pop('ingredients')
+        try:
+            ingredients = data.pop('ingredients')
+        except Exception:
+            return Response({"Ingredients": "Required field"}, status=status.HTTP_400_BAD_REQUEST)
         ingred_serializer = IngredientSerializer(data = ingredients, many = True)
         ingred_serializer.is_valid(raise_exception = True)
         serializer = RecipeCreateSerializer(data = data)
@@ -124,7 +127,7 @@ class SavedByUserRecipesAPIView(APIView):
     )
     def get(self, request, *args, **kwargs):
         profile = request.user.profile
-        queryset = profile.saves
+        queryset = profile.saves.all()
         data = get_paginated_data(queryset, request)
         return Response(data, status = status.HTTP_200_OK)
     
@@ -139,11 +142,15 @@ class SaveRecipeAPIView(APIView):
                               "все сохраненные пользователем рецепты. ",                 
         responses = {
             200: "Success.",
+            403: "User is not verified.",
             404: "Recipe is not found."
         },
     )
-    def get(self, request, slug, *args, **kwargs):
-        profile = request.user.profile
+    def put(self, request, slug, *args, **kwargs):
+        user = request.user
+        if not user.is_verified:
+            return Response({"Error": "User is not verified."}, status = status.HTTP_403_FORBIDDEN)
+        profile = user.profile
         try:
             recipe = Recipe.objects.get(slug = slug)
         except Exception:
@@ -163,11 +170,15 @@ class LikeRecipeAPIView(APIView):
                               "возможность сохранить рецепт. ",                
         responses = {
             200: "Success.",
+            403: "User is not verified.",
             404: "Recipe is not found."
         },
     )
-    def get(self, request, slug, *args, **kwargs):
-        profile = request.user.profile
+    def put(self, request, slug, *args, **kwargs):
+        user = request.user
+        if not user.is_verified:
+            return Response({"Error": "User is not verified."}, status = status.HTTP_403_FORBIDDEN)
+        profile = user.profile
         try:
             recipe = Recipe.objects.get(slug = slug)
         except Exception:

@@ -67,42 +67,24 @@ class UserFollowAPIView(APIView):
         responses = {
             200: "Success.",
             400: "Invalid data.",
+            403: "User is not verified.",
             404: "User profile is not found.",
         },
     )
     def put(self, request, slug, *args, **kwargs):
+        user = request.user
+        if not user.is_verified:
+            return Response({"Error": "User is not verified."}, status = status.HTTP_403_FORBIDDEN)
         try:
             profile = UserProfile.objects.get(slug = slug)
         except Exception:
             return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
-        user = request.user
-        user.profile.following.add(profile.user)
+        if profile in user.profile.following.all():
+            user.profile.following.remove(profile.user)
+        else:
+            user.profile.following.add(profile.user)
         return Response({'Message':'Success.'}, status=status.HTTP_200_OK)
     
-class UserUnfollowAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @swagger_auto_schema(
-        tags=['User profile'],
-        operation_description="Этот эндпоинт предоставляет "
-                              "возможность перестать "
-                              "отслежить другого "
-                              "пользователя.",         
-        responses = {
-            200: "Success.",
-            400: "Invalid data.",
-            404: "User profile is not found.",
-        },
-    )
-    def put(self, request, slug, *args, **kwargs):
-        try:
-            profile = UserProfile.objects.get(slug = slug)
-        except Exception:
-            return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
-        user = request.user
-        user.profile.following.remove(profile.user)
-        return Response({'Message':'Success.'}, status=status.HTTP_200_OK)
-
 class SearchUsersAPIView(ListAPIView):
     permission_classes = [IsAuthenticated]
     search_fields = ['username']

@@ -9,7 +9,7 @@ class UserProfile(models.Model):
     username = models.CharField(max_length = 255)
     bio = models.TextField(blank = True, null = True)
     profile_picture = models.ImageField(upload_to = 'cookscorner/user_profile', blank = True, null = True)
-    following = models.ManyToManyField(User, related_name = 'followers', blank = True)
+    following = models.ManyToManyField('self', symmetrical = False, related_name = 'followers', blank = True)
     slug = AutoSlugField(populate_from = 'username', unique = True, always_update=True)
 
     def __str__(self):

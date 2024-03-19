@@ -1,21 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <title></title>
 
-<head>
-	<title>Подтверждение регистрации</title>
-</head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+1p&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      a.text:active,
+      a.text:hover,
+      a.text {
+        text-decoration: none;
+        color: white;
+      }
+    </style>
+    <!-- CSS Reset : BEGIN -->
+  </head>
 
-<body>
-	<div>
-		<h1>Добро пожаловать в наше приложение!</h1>
-		<p>Привет, пользователь!</p>
-		<p>Благодарим вас за регистрацию в нашем приложении. Пожалуйста, подтвердите свою учетную запись, перейдя по
-			следующей ссылке:</p>
-		<a href={{link_app}} target="_blank"">Подтвердить
-			регистрацию</a>
-		<p>Если вы не регистрировались в нашем приложении, просто проигнорируйте это письмо.</p>
-		<p>С уважением, <br>Нурсултан в квадрате^^</p>
-	</div>
-</body>
+  <body
+    style="
+      margin: 0;
+      padding: 0 !important;
+      background-color: #f1f1f1;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-image: url(https://svgshare.com/i/14Xe.svg);
+      background-repeat: repeat;
+    "
+  >
+    <div
+      style="
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-evenly;
+      "
+    >
+      <div
+        style="
+          width: 30%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: c;
+        "
+      >
+        <img
+          style="width: clamp(100px, 30vw, 400px)"
+          src="https://svgshare.com/i/14WG.svg"
+          alt=""
+        />
+        <div
+          style="
+            font-family: Poppins, sans-serif;
+            font-weight: 700;
+            font-size: clamp(16px, 4vw, 48px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            color: rgba(250, 158, 49, 1);
+          "
+        >
+          CooksCorner
+        </div>
+      </div>
 
+      <div
+        style="
+          width: 40%;
+          font-family: Poppins, sans-serif;
+          font-weight: 400;
+          font-size: clamp(12px, 2vw, 32px);
+          font-style: normal;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          color: rgba(52, 52, 52, 1);
+        "
+      >
+        <h1>Greetings!</h1>
+        <div>
+          This is a letter with a link to complete registration on our project
+          by searching for recipes from the cooking community,
+          <b>CooksCorner!</b>
+        </div>
+        <br />
+        <div>
+          To confirm your email and complete registration, click on the button
+          below
+        </div>
+        <br />
+        <a
+          style="
+            display: block;
+            background-color: rgba(250, 158, 49, 1);
+            text-decoration: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+          "
+          href={{link_app}}
+          >Press me
+        </a>
+      </div>
+    </div>
+  </body>
 </html>

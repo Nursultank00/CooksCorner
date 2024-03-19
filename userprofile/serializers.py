@@ -24,7 +24,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return instance
 
     def get_followers_num(self, obj):
-        return len(obj.user.followers.all())
+        return len(obj.followers.all())
     
     def get_following_num(self, obj):
         return len(obj.following.all())
