@@ -1,16 +1,17 @@
-from django.core.paginator import Paginator
 from rest_framework.views import Response, status, APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
 from .models import Recipe
-# from .utils import MyPagination
+from .services import get_paginated_data
 from .serializers import (
                         RecipeSerializer, 
                         AddRecipeSerializer, 
                         IngredientSerializer, 
                         RecipeCreateSerializer
 )
+from userprofile.models import UserProfile
+
 # Create your views here.
 class GetRecipeAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -69,17 +70,42 @@ class AddRecipeAPIView(APIView):
 class RecipesByCategoryAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(
+        tags=['Recipes'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность получить "
+                              "все рецепты определенной категории. ",
+        request_body = AddRecipeSerializer,                   
+        responses = {
+            200: RecipeSerializer
+        },
+    )
     def get(self, request, format=None):
         category = request.query_params.get('category', 'Breakfast')
-        page_number = int(request.query_params.get('page', 1))
-        page_limit = int(request.query_params.get('limit', 10))
         queryset = Recipe.objects.filter(category = category)
-        paginator = Paginator(queryset, page_limit)
-        serializer = RecipeSerializer(paginator.page(page_number), 
-                                      many = True, 
-                                      context = {'request':request})
-        data = {
-            'data': serializer.data,
-            'total': paginator.num_pages
-        }
+        data = get_paginated_data(queryset, request)
+        return Response(data, status = status.HTTP_200_OK)
+    
+
+class RecipesByChefAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        tags=['Recipes'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность получить "
+                              "все рецепты определенного пользователя. ",
+        request_body = AddRecipeSerializer,                   
+        responses = {
+            200: RecipeSerializer,
+            404: "User profile is not found.",
+        },
+    )
+    def get(self, request, slug, *args, **kwargs):
+        try:
+            profile = UserProfile.objects.get(slug = slug)
+        except Exception:
+            return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
+        queryset = Recipe.objects.filter(author = profile)
+        data = get_paginated_data(queryset, request)
         return Response(data, status = status.HTTP_200_OK)

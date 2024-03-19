@@ -18,7 +18,6 @@ from .models import User, ConfirmationCode
 from .users_services import (
                             create_token_and_send_to_email, 
                             get_user_by_token,
-                            validate_user,
                             get_tokens_for_user,
                             destroy_token,
                             )
