@@ -50,3 +50,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 class MailUrlSerializer(serializers.Serializer):
     email = serializers.CharField(max_length = 50)
     url = serializers.CharField(max_length = 100)
+
+class ChangePasswordForgotSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length = 15)
+    password_confirm = serializers.CharField(max_length = 15)

@@ -1,8 +1,6 @@
 from rest_framework.views import Response, status, APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import parser_classes
-from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import filters
 from drf_yasg.utils import swagger_auto_schema
 
@@ -43,7 +41,6 @@ class GetRecipeAPIView(APIView):
 class AddRecipeAPIView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = AddRecipeSerializer
-    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         tags=['Recipes'],

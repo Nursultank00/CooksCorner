@@ -2,8 +2,6 @@ from rest_framework.views import APIView, Response, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework import filters
-from rest_framework.parsers import MultiPartParser
-from rest_framework.decorators import parser_classes
 from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import ProfileSerializer
@@ -18,7 +16,7 @@ class MyProfileAPIView(APIView):
         operation_description="Этот эндпоинт предоставляет "
                               "возможность получить "
                               "подробную информацию "
-                              "о пользователе.",                    
+                              "о себе.",                    
         responses = {
             200: ProfileSerializer
         },
@@ -32,21 +30,19 @@ class MyProfileAPIView(APIView):
         tags=['User profile'],
         operation_description="Этот эндпоинт предоставляет "
                               "возможность обновить "
-                              "подробную информацию "
-                              "о пользователе.",
+                              "свою подробную информацию.",
         request_body = ProfileSerializer,                      
         responses = {
             200: ProfileSerializer,
             400: "Invalid data."
         },
     )
-    @parser_classes((MultiPartParser,))
     def put(self, request, *args, **kwargs):
         profile = request.user.profile
         serializer = ProfileSerializer(profile, data = request.data, context = {'detail': False})
         if serializer.is_valid():
             serializer.update(profile, serializer.validated_data)
-            return Response({'Message':'User profile is successfully updated.'}, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'Error':'Invalid data.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -57,7 +53,7 @@ class UserProfileAPIView(APIView):
         operation_description="Этот эндпоинт предоставляет "
                               "возможность получить "
                               "подробную информацию "
-                              "о пользователе.",                    
+                              "о пользователе по slug. ",                    
         responses = {
             200: ProfileSerializer,
             404: "User profile is not found.",

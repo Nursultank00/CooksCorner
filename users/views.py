@@ -15,6 +15,7 @@ from .serializers import (
                           LoginSerializer,
                           RefreshTokenSerializer,
                           ChangePasswordSerializer,
+                          ChangePasswordForgotSerializer,
                           MailUrlSerializer
                          )
 from .models import User, ConfirmationCode
@@ -247,7 +248,7 @@ class ChangePasswordAPIView(APIView):
     @swagger_auto_schema(
         tags=['Authorization'],
         operation_description="Этот эндпоинт предоставляет "
-                              "возможность пользователю "
+                              "возможность авторизованному пользователю "
                               "изменить пароль аккаунта. ",
         request_body = ChangePasswordSerializer,
         responses={
@@ -269,8 +270,8 @@ class ForgotPasswordChangeAPIView(APIView):
         tags=['Authorization'],
         operation_description="Этот эндпоинт предоставляет "
                               "возможность пользователю "
-                              "изменить пароль аккаунта. ",
-        request_body = ChangePasswordSerializer,
+                              "изменить пароль на новый. ",
+        request_body = ChangePasswordForgotSerializer,
         responses={
             200: "Password is successfully changed.",
             400: "Invalid data.",
