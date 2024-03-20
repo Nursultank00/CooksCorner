@@ -1,6 +1,8 @@
 from rest_framework.views import Response, status, APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import filters
 from drf_yasg.utils import swagger_auto_schema
 
@@ -34,11 +36,14 @@ class GetRecipeAPIView(APIView):
             recipe = Recipe.objects.get(slug = slug)
         except Exception:
             return Response({"Error": "Recipe is not found."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = RecipeSerializer(recipe, context={'request': request})
+        serializer = RecipeSerializer(recipe, context={'request': request,
+                                                       'detail': True})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class AddRecipeAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = AddRecipeSerializer
+    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         tags=['Recipes'],
@@ -58,6 +63,7 @@ class AddRecipeAPIView(APIView):
             return Response({"Error": "User is not verified."}, status = status.HTTP_403_FORBIDDEN)
         data = request.data
         data['author'] = request.user.profile.id
+        print(data.keys())
         try:
             ingredients = data.pop('ingredients')
         except Exception:

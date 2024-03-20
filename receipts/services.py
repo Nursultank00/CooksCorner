@@ -8,7 +8,8 @@ def get_paginated_data(queryset, request):
     paginator = Paginator(queryset, page_limit)
     serializer = RecipeSerializer(paginator.page(page_number), 
                                 many = True, 
-                                context = {'request': request})
+                                context = {'request': request,
+                                           'detail': False})
     data = {
         'data': serializer.data,
         'total': paginator.num_pages
