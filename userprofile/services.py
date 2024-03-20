@@ -7,8 +7,8 @@ def get_paginated_data(queryset, request):
     page_limit = int(request.query_params.get('limit', 10))
     paginator = Paginator(queryset, page_limit)
     serializer = ProfileSerializer(paginator.page(page_number), 
-                                many = True, 
-                                context = {'request': request})
+                                many = True,
+                                context = {'detail': False})
     data = {
         'data': serializer.data,
         'total': paginator.num_pages

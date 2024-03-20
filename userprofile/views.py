@@ -2,12 +2,53 @@ from rest_framework.views import APIView, Response, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework import filters
+from rest_framework.parsers import MultiPartParser
+from rest_framework.decorators import parser_classes
 from drf_yasg.utils import swagger_auto_schema
 
 from .serializers import ProfileSerializer
 from .models import UserProfile
 from .services import get_paginated_data
 # Create your views here.
+
+class MyProfileAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    @swagger_auto_schema(
+        tags=['User profile'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность получить "
+                              "подробную информацию "
+                              "о пользователе.",                    
+        responses = {
+            200: ProfileSerializer
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        profile = request.user.profile
+        serializer = ProfileSerializer(profile, context = {'detail':True})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    @swagger_auto_schema(
+        tags=['User profile'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность обновить "
+                              "подробную информацию "
+                              "о пользователе.",
+        request_body = ProfileSerializer,                      
+        responses = {
+            200: ProfileSerializer,
+            400: "Invalid data."
+        },
+    )
+    @parser_classes((MultiPartParser,))
+    def put(self, request, *args, **kwargs):
+        profile = request.user.profile
+        serializer = ProfileSerializer(profile, data = request.data, context = {'detail': False})
+        if serializer.is_valid():
+            serializer.update(profile, serializer.validated_data)
+            return Response({'Message':'User profile is successfully updated.'}, status=status.HTTP_200_OK)
+        return Response({'Error':'Invalid data.'}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserProfileAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -27,32 +68,8 @@ class UserProfileAPIView(APIView):
             profile = UserProfile.objects.get(slug = slug)
         except Exception:
             return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ProfileSerializer(profile)
+        serializer = ProfileSerializer(profile, context = {'detail': True})
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @swagger_auto_schema(
-        tags=['User profile'],
-        operation_description="Этот эндпоинт предоставляет "
-                              "возможность обновить "
-                              "подробную информацию "
-                              "о пользователе.",
-        request_body = ProfileSerializer,                      
-        responses = {
-            200: ProfileSerializer,
-            400: "Invalid data.",
-            404: "User profile is not found.",
-        },
-    )
-    def put(self, request, slug, *args, **kwargs):
-        try:
-            profile = UserProfile.objects.get(slug = slug)
-        except Exception:
-            return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ProfileSerializer(profile, data = request.data)
-        if serializer.is_valid():
-            serializer.update(profile, serializer.validated_data)
-            return Response({'Message':'User profile is successfully updated.'}, status=status.HTTP_200_OK)
-        return Response({'Error':'Invalid data.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserFollowAPIView(APIView):
@@ -80,9 +97,9 @@ class UserFollowAPIView(APIView):
         except Exception:
             return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
         if profile in user.profile.following.all():
-            user.profile.following.remove(profile.user)
+            user.profile.following.remove(profile)
         else:
-            user.profile.following.add(profile.user)
+            user.profile.following.add(profile)
         return Response({'Message':'Success.'}, status=status.HTTP_200_OK)
     
 class SearchUsersAPIView(ListAPIView):

@@ -1,19 +1,15 @@
 from rest_framework import serializers
-from autoslug.utils import slugify
 
 from .models import UserProfile
 
 class ProfileSerializer(serializers.ModelSerializer):
-    followers_num = serializers.SerializerMethodField()
-    following_num = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
-        fields = ['username', 'bio', 'profile_picture', 'slug', 'followers_num', 'following_num']
-        read_only_fields = ('followers_num', 'following_num')
-        extra_kwargs = {'username': {"required": False},
+        fields = ['username', 'bio', 'profile_picture', 'slug']
+        read_only_fields = ('slug',)
+        extra_kwargs = {
                         'bio': {'required': False, 'allow_null': True},
-                        'profile_picture': {'required': False}
         }
 
     def update(self, instance, validated_data):
@@ -23,8 +19,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-    def get_followers_num(self, obj):
-        return len(obj.followers.all())
-    
-    def get_following_num(self, obj):
-        return len(obj.following.all())
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if self.context['detail']:
+            representation['followers'] = instance.followers.count()
+            representation['following'] = instance.following.count()
+        else:
+            representation.pop('bio')
+        return representation
