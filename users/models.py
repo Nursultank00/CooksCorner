@@ -24,7 +24,6 @@ class UserManager(BaseUserManager):
         return user
     
 class User(AbstractBaseUser, PermissionsMixin):
-    id = models.UUIDField(primary_key = True, default = uuid4, editable = False)
     email = LowercaseEmailField(unique = True)
     is_staff = models.BooleanField(default = False)
     is_superuser = models.BooleanField(default = False)
