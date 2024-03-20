@@ -1,12 +1,14 @@
 import jwt
 
 from decouple import config
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import Response, APIView
 from rest_framework_simplejwt.views import TokenRefreshView
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
 
 from .serializers import (
                           SignupSerializer,
@@ -240,6 +242,7 @@ class ForgotPasswordAPIView(APIView):
 
 
 class ChangePasswordAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
         tags=['Authorization'],
@@ -253,18 +256,41 @@ class ChangePasswordAPIView(APIView):
         },
     )
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated:
-            user = request.user
-        else:
-            token = request.GET.get('token')
-            try:
-                user = get_user_by_token(token)
-            except jwt.exceptions.DecodeError:
-                return Response({'Error':'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
-            except jwt.ExpiredSignatureError:
-                return Response({'Error':'Activation token expired'}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
         serializer = ChangePasswordSerializer(data = request.data, context = {'user': user})
         serializer.is_valid(raise_exception = True)
         user.set_password(serializer.validated_data['new_password'])
+        user.save()
+        return Response({'Message': 'Password is changed successfully.'}, status=status.HTTP_200_OK)
+    
+class ForgotPasswordChangeAPIView(APIView):
+
+    @swagger_auto_schema(
+        tags=['Authorization'],
+        operation_description="Этот эндпоинт предоставляет "
+                              "возможность пользователю "
+                              "изменить пароль аккаунта. ",
+        request_body = ChangePasswordSerializer,
+        responses={
+            200: "Password is successfully changed.",
+            400: "Invalid data.",
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        token = request.GET.get('token')
+        try:
+            user = get_user_by_token(token)
+        except jwt.exceptions.DecodeError:
+            return Response({'Error':'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+        except jwt.ExpiredSignatureError:
+            return Response({'Error':'Activation token expired'}, status=status.HTTP_400_BAD_REQUEST)
+        password, password_confirm = request.data['password'], request.data['password_confirm']
+        if password != password_confirm:
+            return Response({'Error':"Passwords don't match"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            validate_password(password)
+        except Exception as e:
+            return Response({"Error": e}, status = status.HTTP_400_BAD_REQUEST)
+        user.set_password(password)
         user.save()
         return Response({'Message': 'Password is changed successfully.'}, status=status.HTTP_200_OK)

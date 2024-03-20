@@ -3,7 +3,8 @@ from django.urls import path
 from users.views import (
     SignupAPIView, VerifyEmailAPIView, LoginAPIView, 
     TokenRefreshView, LogoutAPIView, DeleteUserAPIView,
-    SendVerifyEmailAPIView, ChangePasswordAPIView, ForgotPasswordAPIView
+    SendVerifyEmailAPIView, ChangePasswordAPIView, ForgotPasswordAPIView,
+    ForgotPasswordChangeAPIView
 )
 
 urlpatterns = [
@@ -16,4 +17,5 @@ urlpatterns = [
     path('delete-user/', DeleteUserAPIView.as_view(), name = 'cookscorner-delete'),
     path('change-password/', ChangePasswordAPIView.as_view(), name = 'cookscorner-change-password'),
     path('forgot-password/', ForgotPasswordAPIView.as_view(), name='cookscorner-forgot-password'),
+    path('forgot-password/change/', ForgotPasswordChangeAPIView.as_view(), name='cookscorner-forgot-password-change'),
 ]
