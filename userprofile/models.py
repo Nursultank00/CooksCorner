@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.db import models
 from autoslug import AutoSlugField
 
@@ -5,6 +7,7 @@ from users.models import User
 
 # Create your models here.
 class UserProfile(models.Model):
+    id = models.UUIDField(primary_key = True, default = uuid4, editable = False)
     user = models.OneToOneField(User, verbose_name = 'user', related_name = 'profile', on_delete = models.CASCADE)
     username = models.CharField(max_length = 255)
     bio = models.TextField(blank = True, null = True)
