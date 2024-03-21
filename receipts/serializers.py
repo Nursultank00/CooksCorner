@@ -1,37 +1,40 @@
 from rest_framework import serializers
 
-from .models import Recipe, Ingredient
+from .models import Recipe, Ingredient, RecipeIngredients
 
-class IngredientCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = ['ingredient_name', 'amount', 'recipe']
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ['ingredient_name', 'amount', 'unit']
+        fields = ['ingredient_name']
+class RecipeIngredientsSerializer(serializers.ModelSerializer):
+    ingredient_name = serializers.ReadOnlyField(source='ingredient.ingredient_name')
+    class Meta:
+        model = RecipeIngredients
+        fields = ['recipe', 'ingredient', 'ingredient_name', 'amount', 'unit']
+        read_only_fields = ('ingredient_name',)
+        extra_kwargs = {
+            'recipe': {'write_only': True},
+            'ingredient': {'write_only': True}
+        }
 
 class RecipeCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ['author', 'name', 'description', 'difficulty', 'meal_picture',
-                  'preparation_time', 'category']
-class AddRecipeSerializer(serializers.ModelSerializer):
-    ingredients = IngredientSerializer(many = True)
-    class Meta:
-        model = Recipe
-        fields = ['author', 'name', 'description', 'difficulty', 'ingredients', 'meal_picture',
-                  'preparation_time', 'category']
+                  'preparation_time', 'category', 'slug']
+        extra_kwargs = {
+            'meal_picture': {'required': False}
+        }
         
 class RecipeSerializer(serializers.ModelSerializer):
     author_name = serializers.ReadOnlyField(source='author.username')
     author_slug = serializers.ReadOnlyField(source='author.slug')
-    ingredients = IngredientSerializer(many = True)
+    ingredients = RecipeIngredientsSerializer(many = True)
     class Meta:
         model = Recipe
         fields = ['author_name', 'author_slug', 'name', 'description', 'difficulty', 'slug', 
                   'meal_picture', 'preparation_time', 'ingredients']
-    
+
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         user = self.context['request'].user

@@ -67,7 +67,8 @@ class UserProfileAPIView(APIView):
         except Exception:
             return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
         serializer = ProfileSerializer(profile, context = {'detail': True,
-                                                           'user': request.user})
+                                                           'user': request.user,
+                                                           'me': False})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

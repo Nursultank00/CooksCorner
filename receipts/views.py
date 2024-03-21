@@ -5,13 +5,8 @@ from rest_framework import filters
 from drf_yasg.utils import swagger_auto_schema
 
 from .models import Recipe
-from .services import get_paginated_data
-from .serializers import (
-                        RecipeSerializer, 
-                        AddRecipeSerializer, 
-                        IngredientSerializer, 
-                        RecipeCreateSerializer
-)
+from .services import get_paginated_data, create_recipe, create_recipe_ingredinets_relation
+from .serializers import RecipeSerializer
 from userprofile.models import UserProfile
 
 # Create your views here.
@@ -37,17 +32,15 @@ class GetRecipeAPIView(APIView):
         serializer = RecipeSerializer(recipe, context={'request': request,
                                                        'detail': True})
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 class AddRecipeAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = AddRecipeSerializer
 
     @swagger_auto_schema(
         tags=['Recipes'],
         operation_description="Этот эндпоинт предоставляет "
                               "возможность создать "
-                              "новый рецепт.",
-        request_body = AddRecipeSerializer,                   
+                              "новый рецепт.",                 
         responses = {
             201: "Recipe is created.",
             400: "Invalid data.",
@@ -60,19 +53,12 @@ class AddRecipeAPIView(APIView):
             return Response({"Error": "User is not verified."}, status = status.HTTP_403_FORBIDDEN)
         data = request.data
         data['author'] = request.user.profile.id
-        print(data.keys())
         try:
             ingredients = data.pop('ingredients')
         except Exception:
             return Response({"Ingredients": "Required field"}, status=status.HTTP_400_BAD_REQUEST)
-        ingred_serializer = IngredientSerializer(data = ingredients, many = True)
-        ingred_serializer.is_valid(raise_exception = True)
-        serializer = RecipeCreateSerializer(data = data)
-        serializer.is_valid(raise_exception = True)
-        recipe = serializer.save()
-        for item in ingred_serializer.validated_data:
-            item['recipe'] = recipe
-        ingred_serializer.save()
+        recipe = create_recipe(data = data)
+        create_recipe_ingredinets_relation(recipe = recipe, ingredients = ingredients)
         return Response({"Message": "Recipe is created."}, status=status.HTTP_201_CREATED)
 
 class RecipesByCategoryAPIView(APIView):

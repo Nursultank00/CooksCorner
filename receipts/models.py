@@ -33,10 +33,17 @@ class Recipe(models.Model):
         return f"{self.name}; slug: {self.slug}"
 
 class Ingredient(models.Model):
-    ingredient_name = models.CharField(max_length = 30)
-    amount = models.CharField(max_length = 40)
-    unit = models.CharField(max_length = 40)
-    recipe = models.ForeignKey(Recipe, verbose_name = 'recipe', related_name = 'ingredients', on_delete = models.CASCADE)
+    ingredient_name = models.CharField(max_length = 50, unique = True)
 
     def __str__(self):
-        return f"{self.ingredient_name}:{self.recipe}"
+        return f"{self.ingredient_name}"
+    
+
+class RecipeIngredients(models.Model):
+    recipe = models.ForeignKey(Recipe, verbose_name = 'recipe', related_name = 'ingredients', on_delete = models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, verbose_name = 'ingredient', related_name = 'recipe', on_delete = models.CASCADE)
+    amount = models.CharField(max_length = 40)
+    unit = models.CharField(max_length = 40)
+
+    def __str__(self):
+        return f"{self.recipe.name}:{self.recipe.slug}:{self.ingredient.ingredient_name}"

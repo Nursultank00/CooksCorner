@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 
-from .serializers import RecipeSerializer
+from .serializers import RecipeSerializer, RecipeCreateSerializer
+from .models import Ingredient, RecipeIngredients, Recipe
 
 def get_paginated_data(queryset, request):
     page_number = int(request.query_params.get('page', 1))
@@ -15,3 +16,22 @@ def get_paginated_data(queryset, request):
         'total': paginator.num_pages
     }
     return data
+
+def create_recipe(data):
+    serializer = RecipeCreateSerializer(data = data)
+    serializer.is_valid(raise_exception = True)
+    recipe = Recipe.objects.create(**serializer.validated_data)
+    return recipe
+
+def create_recipe_ingredinets_relation(recipe, ingredients):
+    result = []
+    for ingredient in ingredients:
+        ingred = Ingredient.objects.get_or_create(ingredient_name = ingredient['ingredient_name'])
+        amount = ingredient['amount']
+        unit = ingredient['unit']
+        relation = RecipeIngredients.objects.create(recipe = recipe,
+                                                    ingredient = ingred[0],
+                                                    amount = amount,
+                                                    unit = unit)
+        result.append(relation)
+    return result
