@@ -39,7 +39,9 @@ class MyProfileAPIView(APIView):
     )
     def put(self, request, *args, **kwargs):
         profile = request.user.profile
-        serializer = ProfileSerializer(profile, data = request.data, context = {'detail': False})
+        serializer = ProfileSerializer(profile, data = request.data, context = {'detail': False,
+                                                                                'user': request.user,
+                                                                                'me': True})
         if serializer.is_valid():
             serializer.update(profile, serializer.validated_data)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -64,7 +66,8 @@ class UserProfileAPIView(APIView):
             profile = UserProfile.objects.get(slug = slug)
         except Exception:
             return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = ProfileSerializer(profile, context = {'detail': True})
+        serializer = ProfileSerializer(profile, context = {'detail': True,
+                                                           'user': request.user})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

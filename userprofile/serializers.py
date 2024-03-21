@@ -24,6 +24,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         if self.context['detail']:
             representation['followers'] = instance.followers.count()
             representation['following'] = instance.following.count()
+            representation['recipes'] = instance.recipes.count()
+            representation['is_followed'] = instance.followers.filter(user = self.context['user']).exists()
+            if self.context['me']:
+                representation['isVerified'] = instance.user.is_verified
         else:
             representation.pop('bio')
         return representation

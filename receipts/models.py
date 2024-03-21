@@ -14,7 +14,6 @@ DIFFICULTY_CHOICES = (
         ('Medium', 'Medium'),
         ('Hard', 'Hard'),
 )
-# Create your models here.
     
 class Recipe(models.Model):
     author = models.ForeignKey(UserProfile, verbose_name = 'author', related_name = 'recipes', on_delete = models.CASCADE)
@@ -36,6 +35,7 @@ class Recipe(models.Model):
 class Ingredient(models.Model):
     ingredient_name = models.CharField(max_length = 30)
     amount = models.CharField(max_length = 40)
+    unit = models.CharField(max_length = 40)
     recipe = models.ForeignKey(Recipe, verbose_name = 'recipe', related_name = 'ingredients', on_delete = models.CASCADE)
 
     def __str__(self):
