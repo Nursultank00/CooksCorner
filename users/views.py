@@ -49,15 +49,16 @@ class SignupAPIView(APIView):
     def post(self, request, *args, **kwargs):
         data = request.data.copy()
         url = data.pop('url', config('EMAIL_LINK'))
+        try:
+            username = data.get('username')
+        except Exception:
+             return Response({'Message': 'Invalid username.'}, status = status.HTTP_400_BAD_REQUEST)
         serializer = SignupSerializer(data = data)
         serializer.is_valid(raise_exception = True)
-        try:
-            serializer.save()
-        except Exception as e:
-            Response(e, status=status.HTTP_400_BAD_REQUEST)
+        serializer.save()
         user = User.objects.get(email = serializer.validated_data['email'])
         try:
-            UserProfile.objects.create(user = user, username = serializer.validated_data['username'])
+            UserProfile.objects.create(user = user, username = username)
         except Exception as e:
             user.delete()
             return Response({'Message': 'Invalid username.'}, status = status.HTTP_400_BAD_REQUEST)

@@ -10,6 +10,9 @@ class SignupSerializer(serializers.Serializer):
     password_confirm = serializers.CharField(max_length=15, min_length=8, write_only=True)
 
     def validate(self, data):
+        user = User.objects.filter(email = data['email']).first()
+        if user is not None:
+            raise ValidationError("User with this email already exists.")
         if data['password'] != data['password_confirm']:
             raise ValidationError("Passwords don't match")
         validate_password(data['password'])
