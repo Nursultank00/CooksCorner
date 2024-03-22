@@ -1,6 +1,5 @@
 import re
 
-from decouple import config
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
@@ -27,7 +26,7 @@ class EmailUtil:
     @staticmethod
     def send_email(data, url, html):
         context ={
-            'link_app': ''.join(url)+data['token']#config('EMAIL_LINK')+data['token']
+            'link_app': ''.join(url)+data['token']
         }
         html_content = render_to_string(
             html, context=context

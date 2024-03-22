@@ -22,9 +22,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ['author', 'name', 'description', 'difficulty', 'meal_picture',
                   'preparation_time', 'category', 'slug']
-        extra_kwargs = {
-            'meal_picture': {'required': False}
-        }
         
 class RecipeSerializer(serializers.ModelSerializer):
     author_name = serializers.ReadOnlyField(source='author.username')

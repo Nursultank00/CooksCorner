@@ -7,6 +7,11 @@ from drf_yasg.utils import swagger_auto_schema
 from .serializers import ProfileSerializer
 from .models import UserProfile
 from .services import get_paginated_data
+from .swagger import (
+                        search_user_swagger,
+                        user_detail_swagger,
+                        myprofile_swagger,
+)
 # Create your views here.
 
 class MyProfileAPIView(APIView):
@@ -16,9 +21,9 @@ class MyProfileAPIView(APIView):
         operation_description="Этот эндпоинт предоставляет "
                               "возможность получить "
                               "подробную информацию "
-                              "о себе.",                    
+                              "о себе.",          
         responses = {
-            200: ProfileSerializer
+            200: myprofile_swagger['response']
         },
     )
     def get(self, request, *args, **kwargs):
@@ -31,9 +36,9 @@ class MyProfileAPIView(APIView):
         operation_description="Этот эндпоинт предоставляет "
                               "возможность обновить "
                               "свою подробную информацию.",
-        request_body = ProfileSerializer,                      
+        request_body = myprofile_swagger['request_body'],                      
         responses = {
-            200: ProfileSerializer,
+            200: myprofile_swagger['response'],
             400: "Invalid data."
         },
     )
@@ -57,7 +62,7 @@ class UserProfileAPIView(APIView):
                               "подробную информацию "
                               "о пользователе по slug. ",                    
         responses = {
-            200: ProfileSerializer,
+            200: user_detail_swagger['response'],
             404: "User profile is not found.",
         },
     )
@@ -83,7 +88,6 @@ class UserFollowAPIView(APIView):
                               "пользователя.",         
         responses = {
             200: "Success.",
-            400: "Invalid data.",
             403: "User is not verified.",
             404: "User profile is not found.",
         },
@@ -108,11 +112,12 @@ class SearchUsersAPIView(ListAPIView):
     filter_backends = (filters.SearchFilter,)
 
     @swagger_auto_schema(
-        tags=['Recipes'],
+        tags=['User profile'],
         operation_description="Этот эндпоинт предоставляет "
-                              "возможность найти рецепт по названию. ",                
+                              "возможность найти рецепт по названию. ",
+        manual_parameters = search_user_swagger['parameters'],
         responses = {
-            200: ProfileSerializer,
+            200: search_user_swagger['response'],
         },
     )
     def get(self, request, *args, **kwargs):

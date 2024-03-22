@@ -12,11 +12,7 @@ from drf_yasg import openapi
 
 from .serializers import (
                           SignupSerializer,
-                          LoginSerializer,
-                          RefreshTokenSerializer,
-                          ChangePasswordSerializer,
-                          ChangePasswordForgotSerializer,
-                          MailUrlSerializer
+                          ChangePasswordSerializer
                          )
 from .models import User, ConfirmationCode
 from .users_services import (
@@ -25,6 +21,10 @@ from .users_services import (
                             get_tokens_for_user,
                             destroy_token,
                             )
+from .swagger import (signup_swagger, login_swagger, resend_swagger, 
+                      logout_swagger, forgot_password_swagger,
+                      forgot_password_change_swagger)
+
 from userprofile.models import UserProfile
 # Create your views here.
 
@@ -40,9 +40,9 @@ class SignupAPIView(APIView):
                               "Токен обновления позволяет пользователям "
                               "продлить срок действия своего Access Token без "
                               "необходимости повторной аутентификации.",
-        request_body=SignupSerializer,                      
-        responses={
-            201: "User has been created.",
+        request_body = signup_swagger['request_body'],                      
+        responses = {
+            201: signup_swagger['response'],
             400: "Invalid data.",
         },
     )
@@ -109,7 +109,7 @@ class SendVerifyEmailAPIView(APIView):
                               "возможность пользователю "
                               "переотправить токен для "
                               "верификации почты. ",
-        request_body = MailUrlSerializer,
+        request_body = resend_swagger['request_body'],
         responses = {
             200: "The verification email has been sent. ",
             400: "User is already verified.",
@@ -126,7 +126,7 @@ class SendVerifyEmailAPIView(APIView):
 
 class LoginAPIView(APIView):
     permission_classes = [AllowAny]
-    serializer_class = LoginSerializer
+
     @swagger_auto_schema(
         tags=['Authorization'],
         operation_description="Этот эндпоинт предоставляет "
@@ -134,11 +134,11 @@ class LoginAPIView(APIView):
                               "авторизоваться с помощью логина и пароля."
                               "Возвращает токен доступа (Access Token) "
                               "и токен обновления (Refresh Token). ",
-        request_body = LoginSerializer,
+        request_body = login_swagger['request_body'],
         responses = {
-            200: "Successfully logged in.",
+            200: login_swagger['response'],
             404: "User is not found.",
-            404: "Invalid data.",
+            400: "Wrong password!",
         },
     )
     def post(self, request, *args, **kwargs):
@@ -178,16 +178,14 @@ class LogoutAPIView(APIView):
                               "возможность пользователю "
                               "разлогиниться из приложения "
                               "с помощью токена обновления (Refresh Token). ",
-        request_body = RefreshTokenSerializer,
-        responses={
+        request_body = logout_swagger['request_body'],
+        responses = {
             200: "Successfully logged out.",
             400: "Invalid token.",
         },
     )
     def post(self, request, *args, **kwargs):
-        serializer = RefreshTokenSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        refresh_token = serializer.validated_data["refresh"]
+        refresh_token = request.data["refresh"]
         try:
             destroy_token(refresh_token)
             return Response({"Message": "You have successfully logged out."}, status=status.HTTP_200_OK)
@@ -201,7 +199,7 @@ class DeleteUserAPIView(APIView):
         operation_description = "Этот эндпоинт предоставляет "
                               "возможность пользователю "
                               "удалить собственный аккаунт. ",
-        request_body = RefreshTokenSerializer,
+        request_body = logout_swagger['request_body'],
         responses = {
             200: "User is successfully deleted.",
             400: "Invalid token.",
@@ -224,9 +222,9 @@ class ForgotPasswordAPIView(APIView):
         operation_description="Этот эндпоинт предоставляет "
                               "возможность пользователю "
                               "получить токен для сброса пароля. ",
-        request_body = MailUrlSerializer,
+        request_body = forgot_password_swagger['request_body'],
         responses = {
-            200: "Password is successfully changed.",
+            200: "The verification email has been sent.",
             400: "Invalid data.",
         },
     )
@@ -252,7 +250,7 @@ class ChangePasswordAPIView(APIView):
                               "изменить пароль аккаунта. ",
         request_body = ChangePasswordSerializer,
         responses={
-            200: "Password is successfully changed.",
+            200: "Password has been successfully changed.",
             400: "Invalid data.",
         },
     )
@@ -271,9 +269,10 @@ class ForgotPasswordChangeAPIView(APIView):
         operation_description="Этот эндпоинт предоставляет "
                               "возможность пользователю "
                               "изменить пароль на новый. ",
-        request_body = ChangePasswordForgotSerializer,
+        manual_parameters = forgot_password_change_swagger['parameters'],
+        request_body = forgot_password_change_swagger['request_body'],
         responses={
-            200: "Password is successfully changed.",
+            200: "Password has been successfully changed.",
             400: "Invalid data.",
         },
     )

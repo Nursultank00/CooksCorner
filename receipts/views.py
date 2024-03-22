@@ -7,6 +7,14 @@ from drf_yasg.utils import swagger_auto_schema
 from .models import Recipe
 from .services import get_paginated_data, create_recipe, create_recipe_ingredinets_relation
 from .serializers import RecipeSerializer
+from .swagger import (
+                    search_recipe_swagger,
+                    recipe_detail_swagger,
+                    recipe_list_swagger,
+                    recipe_by_category_swagger,
+                    add_recipe_swagger
+)
+
 from userprofile.models import UserProfile
 
 # Create your views here.
@@ -20,7 +28,7 @@ class GetRecipeAPIView(APIView):
                               "подробную информацию "
                               "о рецепте.",                    
         responses = {
-            200: RecipeSerializer,
+            200: recipe_detail_swagger['response'],
             404: "Recipe is not found.",
         },
     )
@@ -40,7 +48,8 @@ class AddRecipeAPIView(APIView):
         tags=['Recipes'],
         operation_description="Этот эндпоинт предоставляет "
                               "возможность создать "
-                              "новый рецепт.",                 
+                              "новый рецепт.",
+        request_body = add_recipe_swagger['request_body'],            
         responses = {
             201: "Recipe is created.",
             400: "Invalid data.",
@@ -68,9 +77,10 @@ class RecipesByCategoryAPIView(APIView):
         tags=['Recipes'],
         operation_description="Этот эндпоинт предоставляет "
                               "возможность получить "
-                              "все рецепты определенной категории. ",            
+                              "все рецепты определенной категории. ",
+        manual_parameters = recipe_by_category_swagger['parameters'],
         responses = {
-            200: RecipeSerializer
+            200: recipe_by_category_swagger['response']
         },
     )
     def get(self, request, format=None):
@@ -89,7 +99,7 @@ class RecipesByChefAPIView(APIView):
                               "возможность получить "
                               "все рецепты определенного пользователя. ",                  
         responses = {
-            200: RecipeSerializer,
+            200: recipe_list_swagger['response'],
             404: "User profile is not found.",
         },
     )
@@ -111,7 +121,7 @@ class SavedByUserRecipesAPIView(APIView):
                               "возможность получить "
                               "все сохраненные пользователем рецепты. ",              
         responses = {
-            200: RecipeSerializer,
+            200: recipe_list_swagger['response'],
         },
     )
     def get(self, request, *args, **kwargs):
@@ -186,9 +196,10 @@ class SearchRecipesAPIView(ListAPIView):
     @swagger_auto_schema(
         tags=['Recipes'],
         operation_description="Этот эндпоинт предоставляет "
-                              "возможность найти рецепт по названию. ",                
+                              "возможность найти рецепт по названию. ",
+        manual_parameters = search_recipe_swagger['parameters'],            
         responses = {
-            200: RecipeSerializer,
+            200: search_recipe_swagger['response'],
         },
     )
     def get(self, request, *args, **kwargs):

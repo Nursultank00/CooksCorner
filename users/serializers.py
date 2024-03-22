@@ -3,11 +3,6 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from .models import User
 
-class LoginSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['email', 'password']
-
 class SignupSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=255)
     email = serializers.EmailField()
@@ -24,14 +19,6 @@ class SignupSerializer(serializers.Serializer):
         validated_data.pop('password_confirm')
         validated_data.pop('username')
         return User.objects.create_user(**validated_data)
-    
-class RefreshTokenSerializer(serializers.Serializer):
-    refresh = serializers.CharField()
-
-class MailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['email']
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(max_length = 15)
@@ -46,11 +33,3 @@ class ChangePasswordSerializer(serializers.Serializer):
             raise ValidationError("Passwords don't match.")
         validate_password(data['new_password'])
         return data
-    
-class MailUrlSerializer(serializers.Serializer):
-    email = serializers.CharField(max_length = 50)
-    url = serializers.CharField(max_length = 100)
-
-class ChangePasswordForgotSerializer(serializers.Serializer):
-    password = serializers.CharField(max_length = 15)
-    password_confirm = serializers.CharField(max_length = 15)
