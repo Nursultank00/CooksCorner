@@ -28,7 +28,9 @@ class MyProfileAPIView(APIView):
     )
     def get(self, request, *args, **kwargs):
         profile = request.user.profile
-        serializer = ProfileSerializer(profile, context = {'detail':True})
+        serializer = ProfileSerializer(profile, context = {'detail':True,
+                                                           'user': request.user,
+                                                            'me': True})
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     @swagger_auto_schema(
@@ -38,7 +40,7 @@ class MyProfileAPIView(APIView):
                               "свою подробную информацию.",
         request_body = myprofile_swagger['request_body'],                      
         responses = {
-            200: myprofile_swagger['response'],
+            200: "Profile has been successfully changed.",
             400: "Invalid data."
         },
     )
@@ -49,7 +51,7 @@ class MyProfileAPIView(APIView):
                                                                                 'me': True})
         if serializer.is_valid():
             serializer.update(profile, serializer.validated_data)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({'Message':'Profile has been successfully changed.'}, status=status.HTTP_200_OK)
         return Response({'Error':'Invalid data.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
