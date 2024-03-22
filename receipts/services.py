@@ -1,3 +1,5 @@
+import json
+
 from django.core.paginator import Paginator
 
 from .serializers import RecipeSerializer, RecipeCreateSerializer
@@ -17,6 +19,13 @@ def get_paginated_data(queryset, request):
     }
     return data
 
+def _convert_ingredients_to_json(data):
+    if isinstance(data, str):
+        data = json.loads(data)
+    if isinstance(data[0], str):
+        data = json.loads(data[0])
+    return data
+
 def create_recipe(data):
     serializer = RecipeCreateSerializer(data = data)
     serializer.is_valid(raise_exception = True)
@@ -25,6 +34,7 @@ def create_recipe(data):
 
 def create_recipe_ingredinets_relation(recipe, ingredients):
     result = []
+    ingredients = _convert_ingredients_to_json(ingredients)
     for ingredient in ingredients:
         ingred = Ingredient.objects.get_or_create(ingredient_name = ingredient['ingredient_name'])
         amount = ingredient['amount']
