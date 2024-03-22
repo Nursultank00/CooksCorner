@@ -5,7 +5,6 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 
 from .utils import LowercaseEmailField
-# Create your models here.
 
 class UserManager(BaseUserManager):
 
