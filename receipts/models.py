@@ -20,7 +20,7 @@ class Recipe(models.Model):
     name = models.CharField(max_length = 100)
     description = models.TextField()
     difficulty = models.CharField(max_length=10, choices = DIFFICULTY_CHOICES, default = 'Medium')
-    meal_picture = models.ImageField(upload_to = 'cookscorner/recipe_images')
+    meal_picture = models.ImageField(upload_to = 'cookscorner/recipe_images', max_length = 500)
     preparation_time = models.PositiveIntegerField(default = 30)
     category = models.CharField(max_length=10, choices = CATEGORY_CHOICES, default = 'Lunch')
     slug = AutoSlugField(populate_from = 'name', unique = True, always_update=True)
