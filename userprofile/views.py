@@ -90,6 +90,7 @@ class UserFollowAPIView(APIView):
                               "пользователя.",         
         responses = {
             200: "Success.",
+            400: "You can't follow yourself",
             403: "User is not verified.",
             404: "User profile is not found.",
         },
@@ -102,6 +103,8 @@ class UserFollowAPIView(APIView):
             profile = UserProfile.objects.get(slug = slug)
         except Exception:
             return Response({'Error':'User profile is not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if user.profile == profile:
+            return Response({"Error": "You can't follow yourself"}, status = status.HTTP_400_BAD_REQUEST)
         if profile in user.profile.following.all():
             user.profile.following.remove(profile)
         else:

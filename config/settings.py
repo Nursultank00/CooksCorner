@@ -198,3 +198,13 @@ SIMPLE_JWT = {
     
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+SWAGGER_SETTINGS = {
+   'SECURITY_DEFINITIONS': {
+      'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+      }
+   }
+}

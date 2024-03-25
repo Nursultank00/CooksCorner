@@ -67,7 +67,11 @@ class AddRecipeAPIView(APIView):
         except Exception:
             return Response({"Ingredients": "Required field"}, status=status.HTTP_400_BAD_REQUEST)
         recipe = create_recipe(data = data)
-        create_recipe_ingredinets_relation(recipe = recipe, ingredients = ingredients)
+        try:
+            create_recipe_ingredinets_relation(recipe = recipe, ingredients = ingredients)
+        except Exception:
+            recipe.delete()
+            return Response({"Error": "Invalid ingredients field."}, status = status.HTTP_400_BAD_REQUEST)
         return Response({"Message": "Recipe is created."}, status=status.HTTP_201_CREATED)
 
 class RecipesByCategoryAPIView(APIView):
